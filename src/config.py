@@ -11,9 +11,24 @@ class ApiConfig(BaseSchema):
     port: int = 8000
     project_name: str = 'base'
 
+class DatabaseConfig(BaseSchema):
+    host: str
+    port: int
+    user: str
+    password: str
+    name: str
+    driver: str = 'postgresql+psycopg_async'
+
+    @property
+    def dsn(self) -> str:
+        return f'{self.driver}://{self.username}:{self.password}@{self.host}:{self.port}/{self.database}'
+
+
+
 class Config(BaseSchema):
     model_config = ConfigDict(extra='allow', from_attributes=True)
     api: ApiConfig
+    database: DatabaseConfig
 
 
 def get_config() -> Config:
