@@ -1,0 +1,22 @@
+version: "3.3"
+
+services:
+  database:
+    image: postgres:15.2
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5433:5432"
+  backend:
+    build:
+      context: ..
+      dockerfile: ./deploy/Dockerfile
+    environment:
+      CONFIG_PATH: /app/configs/config.toml
+    volumes:
+      - ../src:/app/src:ro
+
+
