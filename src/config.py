@@ -14,9 +14,9 @@ class ApiConfig(BaseSchema):
 class DatabaseConfig(BaseSchema):
     host: str
     port: int
-    user: str
+    username: str
     password: str
-    name: str
+    database: str
     driver: str = 'postgresql+psycopg_async'
 
     @property
