@@ -4,8 +4,8 @@ port = 8000
 project_name = 'base'
 
 [database]
-host='postgres
-ports=5433
-user='postgres'
+host='127.0.0.1'
+port=5433
+username='postgres'
 password='postgres'
 database='postgres'
