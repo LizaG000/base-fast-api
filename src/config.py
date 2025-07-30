@@ -20,10 +20,8 @@ class DatabaseConfig(BaseSchema):
     driver: str = 'postgresql+psycopg_async'
 
     @property
-    def dsn(self) -> str:
+    def dsn(self, db = True) -> str:
         return f'{self.driver}://{self.username}:{self.password}@{self.host}:{self.port}/{self.database}'
-
-
 
 class Config(BaseSchema):
     model_config = ConfigDict(extra='allow', from_attributes=True)
@@ -34,7 +32,7 @@ class Config(BaseSchema):
 def get_config() -> Config:
     dynaconf = Dynaconf(
         settings_files=[
-            './deploy/configs/config.toml'
+            '././deploy/configs/config.toml'
         ],
         envvar_prefix='Liza',
         load_dotenv=True,

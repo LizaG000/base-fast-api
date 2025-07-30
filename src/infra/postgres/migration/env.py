@@ -1,3 +1,10 @@
+import os
+import sys
+from loguru import logger
+
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
+sys.path.insert(0, BASE_DIR)
+
 import asyncio
 from logging.config import fileConfig
 from typing import cast
@@ -7,9 +14,10 @@ from sqlalchemy import text
 from alembic import context
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from src.config import DatabaseConfig, get_config
+from src.config import get_config
 from src.infra.postgres.tables import *
 from src.infra.postgres.schemas import enabled_pg_schemas
+
 
 cfg = get_config()
 
@@ -24,7 +32,7 @@ if len(config.get_section(config.config_ini_section)['sqlalchemy.url']) == 0:  #
         'sqlalchemy.url',
         cfg.database.dsn,
     )
-
+logger.info(config.get_section(config.config_ini_section)['sqlalchemy.url'])
 # хранит в себе модели
 target_metadata = BaseDBModel.metadata
 # хранит в себе имена схем

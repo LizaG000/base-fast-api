@@ -9,6 +9,9 @@ from src.config import Config
 from src.config import ApiConfig
 from src.config import DatabaseConfig
 
+from src.usecase.users.create import CreateUserUsecase
+from src.usecase.users.get_all import GetUsersUsecase
+
 class MainProvider(Provider):
     scope = Scope.REQUEST
 
@@ -23,4 +26,9 @@ class MainProvider(Provider):
         return config.database
 
     _request = from_context(provides=Request, scope=Scope.REQUEST)
+
+    _get_usecases = provide_all(
+        CreateUserUsecase,
+        GetUsersUsecase,
+    )
 

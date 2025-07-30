@@ -2,7 +2,7 @@ FROM python:3.11-slim AS backend
 
 WORKDIR /app
 
-COPY pyproject.toml poetry.lock* /app/
+COPY pyproject.toml poetry.lock* alembic.ini /app/
 
 COPY deploy/configs /app/deploy/configs 
 
