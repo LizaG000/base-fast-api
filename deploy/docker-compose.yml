@@ -36,7 +36,7 @@ services:
     depends_on:
       - database
     volumes:
-      - ../registration/Migrations:/app/registration/Migrations:rw
+      - pgadmin_data:/var/lib/pgadmin
 
 volumes:
   pgdata:
