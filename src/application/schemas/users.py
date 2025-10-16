@@ -1,6 +1,6 @@
 from uuid import UUID
 from datetime import datetime
-from user_microservice.application.schemas.common import BaseModel
+from src.application.schemas.common import BaseModel
 
 class UserSchemas(BaseModel):
     id: UUID
