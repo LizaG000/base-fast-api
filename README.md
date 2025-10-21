@@ -18,23 +18,82 @@
    cd base-fast-api
    ```
 
-3. Создать файл окружения .env
+3. Создайте файл окружения config.toml
    ```
    cd deploy
-   cp configs/excemple.config.toml .env
+   cp configs/excemple.config.toml configs/config.toml 
+   ```
+4. Создайте и запустите виртуальное окружение
+   ```
+   python -m venv [имя_вашего_окружения]
+   ```
+   Запуск для Windows
+   ```
+   venv\Scripts\activate
+   ```
+   Запуск для Linux и MacOS
+   ```
+   source venv/bin/activate
+   ```
+5. Проверьте, что у вас есть bash
+
+   Для Windows
+   
+   - Вариант 1: Использование подсистемы Windows для Linux (WSL)
+      - Откройте PowerShell от имени администратора
+      ```
+      wsl --install
+      ```
+      - Перезагрузите компьютер
+      - Откройте Ubuntu из меню «Пуск»
+      - Вам будет предложено создать имя пользователя и пароль для среды Linux
+   - Вариант 2: Использование Git Bash
+      - Перейдите на официальный [сайт](gitforwindows.org) Git для Windows
+      - Загрузите установочный файл
+      - Запустите загруженный .exe и следуйте инструкциям на экране
+      - В процессе установки выберите использование Git Bash
+      - После завершения установки вы сможете запустить Git Bash через меню «Пуск».
+   
+   Для Linux (чаще всего установлен по умолчанию)
+   
+   Чтобы проверить
+   ```
+   bash --version
+   ```
+   
+   Чтобы установить
+   - Ubuntu или Debian:
+     ```
+     sudo apt-get install bash.
+     ```
+   - Fedora или CentOS:
+     ```
+     sudo dnf install bash.
+     ```
+
+   Для MacOS (чаще всего установлен по умолчанию)
+   
+   Чтобы проверить
+   ```
+   bash --version
+   ```
+   
+   Чтобы установить
+   ```
+   brew install bash
    ```
 
-4. Вернуться в корень проекта и запустить через Makefile (если у вас виндовс просто дублируйте команды)
+6. Вернуться в корень проекта и запустить через Makefile (если у вас виндовс просто дублируйте команды)
    ```
    cd ..
    make compose
    ```
 
-5.  После запуска открой в браузере:
+7.  После запуска открой в браузере:
    
      http://localhost:8000/docs
 
-7. Чтобы остановить проект
+8. Чтобы остановить проект
    ```
    make down
    ```
@@ -128,7 +187,7 @@ src/
 
 ├── application/   # Модели, схемы и ошибки
 
-├── infra/         # Работа с базой данных и миграции
+├── infra/         # Работа с базой данных и миграции + внешние сервисы
 
 ├── main/          # Запуск приложения, DI-контейнер
 
@@ -187,29 +246,27 @@ class TaskModel(BaseDBModel):
   make migrate
   ```
   
-- Добавим use case (логику)
+- Добавим usecase (логику)
   
   в src/usecase/tasks/create.py
   
 ```
-from src.application.schemas.tasks import CreateTaskSchema
+from src.application.schemas.tasks import TaskSchema, CreateTaskSchema
 from src.infra.postgres.tables import TaskModel
-from src.infra.postgres.provider import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from src.infra.postgres.gateways.base import CreateReturningGate
+from dataclasses import dataclass
 
 
-class CreateTaskUsecase:
+@dataclass(slots=True, frozen=True, kw_only=True)
+class CreateTaskUsecase(Usecase[CreateTaskSchema, TaskSchema]):
     """Usecase для создания новой задачи"""
+    session: AsyncSession
+    create_user: CreateReturningGate[TaskModel, CreateTaskSchema, TaskSchema]
 
-    def __init__(self, session: Session):
-        self.session = session
-
-    async def __call__(self, data: CreateTaskSchema) -> None:
-        task = TaskModel(
-            title=data.title,
-            description=data.description,
-        )
-        self.session.add(task)
-        await self.session.commit()
+    async def __call__(self, task: CreateTaskSchema) -> TaskSchema:
+        async with self.session.begin():
+            return await self.create_task(task)
 ```
 
   в src/usecase/tasks/get_all.py
@@ -255,8 +312,8 @@ async def get_tasks(usecase: FromDishka[GetTasksUsecase]) -> list[TaskSchema]:
 async def create_task(
     usecase: FromDishka[CreateTaskUsecase],
     task: CreateTaskSchema
-) -> None:
-    await usecase(task)
+) -> TaskSchema:
+    return await usecase(task)
 
 ```
   
@@ -274,15 +331,20 @@ def setup_core_router() -> APIRouter:
 
 ```
 
+   Добавляем наши юзкейсы в /Users/mac/AI-furniture-bot/backend/src/main/provider.py
+
+```
+_get_usecases = provide_all(
+   CreateTaskUsecase,
+   GetTasksUsecase,
+    )
+```
+
 - Проверяем результат
   
-  Перезапустим контейнер
-  ```
-  make down
-  make compose
-  ```
+  Обновляем страницу Сваггера
 
-- Теперь в Swagger появится новый раздел Tasks
+- Видим, что появился новый раздел Tasks
   
-- Вы умнчка 🎉
+- ТЫ УМНИЧКААААААААААААААААА 🎉
   
