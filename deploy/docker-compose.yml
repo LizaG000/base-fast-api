@@ -12,6 +12,8 @@ services:
     volumes:
       - ../src:/app/src:ro
       - ../src/infra/postgres/migration/versions:/app/src/infra/postgres/migration/versions:rw
+    depends_on:
+      - database
 
   database:
     image: postgres:15.2
@@ -22,8 +24,6 @@ services:
       POSTGRES_DB: postgres
     ports:
       - "5433:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -35,10 +35,37 @@ services:
       - "5050:80"
     depends_on:
       - database
+
+  keycloak-db:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
     volumes:
-      - pgadmin_data:/var/lib/pgadmin
+      - keycloak_db_data:/var/lib/postgresql/data
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    restart: always
+    environment:
+      KC_DB: postgres
+      KC_DB_URL_HOST: keycloak-db
+      KC_DB_URL_DATABASE: keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HTTP_ENABLED: "true"
+      KC_HTTPS: "disabled"     
+    command:
+      - start-dev
+    ports:
+      - "8080:8080"
+    depends_on:
+      - keycloak-db
+
 
 volumes:
-  pgdata:
-  pgadmin_data:
-
+  keycloak_db_data:
