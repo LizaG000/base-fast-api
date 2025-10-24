@@ -29,11 +29,11 @@
    ```
    Запуск для Windows
    ```
-   venv\Scripts\activate
+   [имя_вашего_окружения]\Scripts\activate
    ```
    Запуск для Linux и MacOS
    ```
-   source venv/bin/activate
+   source [имя_вашего_окружения]/bin/activate
    ```
 5. Проверьте, что у вас есть bash
 
